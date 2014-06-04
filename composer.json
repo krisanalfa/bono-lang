@@ -1,0 +1,20 @@
+{
+    "name": "krisanalfa/bono-lang",
+    "description": "Bono Localization Package",
+    "autoload": {
+        "psr-0": {
+            "Bono\\Lang": "src/"
+        },
+        "files": [
+            "src/Bono/Lang/functions.php"
+        ]
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Krisan Alfa Timur",
+            "email": "krisan47@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev"
+}
