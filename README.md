@@ -32,8 +32,20 @@ array(
 ```
 
 - `driver` is a class that responsible to get all list of registered Language and get words for each language available in list
-- `lang` is active language you want to use to translate
+- `lang` is active language you want to use to translate, you can use a `closure` to set the default language, see example below
 - `debug` when you set this config to `false`, and you get nothing from translation, the result is empty string, but if it sets to `true`, you get some debug keyword
+
+Using closure to determine which language is set to be default one
+
+```php
+array(
+    'driver' => '\\Bono\\Lang\\Driver\\FileDriver',
+    'lang' => function() {
+        return $_SESSION['user']['config']['lang'];
+    },
+    'debug' => true
+),
+```
 
 #Basic FileDriver Dictionary Knowledge
 You can change the location of your dictionary, by add `lang.path` in configuration files:

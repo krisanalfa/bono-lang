@@ -35,12 +35,17 @@ class LangProvider extends Provider
 
         $defaultConfig = array(
             'driver' => '\\Bono\\Lang\\Driver\\FileDriver',
-            'lang' => 'en',
-            'debug' => true
+            'lang'   => 'en',
+            'debug'  => true
         );
         $config = array_merge($defaultConfig, $app->config('lang') ?: array());
         $Driver = $config['driver'];
         $driver = new $Driver($config);
+
+        if (is_callable($config['lang'])) {
+            $callableLang = $config['lang'];
+            $config['lang'] = $callableLang();
+        }
 
         $app->config('lang', $config);
 
