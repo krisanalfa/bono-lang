@@ -69,6 +69,7 @@ class Translator
     {
 
         $lang    = $this->lang;
+        $key     = $this->sanitize($key);
         $default = ($this->isDebugMode()) ? '{{ '.$key.' }}' : null;
 
         if (! $this->hasLanguage($lang)) {
@@ -79,11 +80,23 @@ class Translator
 
         $line = $this->arrayGet($lang.'.'.$key, $default);
 
-        if (! empty($param)) {
+        if (! empty($param) and is_array($param)) {
             $line = $this->replaceParam($line, $param);
         }
 
         return $line;
+    }
+
+    /**
+     * Sanitize key, removing spaces and replace them to underscore
+     *
+     * @param  string $key
+     *
+     * @return string
+     */
+    protected function sanitize($key)
+    {
+        return strtolower(str_replace(' ', '_', $key));
     }
 
     /**
@@ -169,7 +182,7 @@ class Translator
      *
      * @return string
      */
-    protected function replaceParam($line, $param)
+    protected function replaceParam($line, array $param)
     {
         foreach ($param as $key => $value) {
             $line = str_replace(':'.$key, $value, $line);
