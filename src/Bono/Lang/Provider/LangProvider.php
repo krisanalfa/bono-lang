@@ -10,19 +10,24 @@ use Bono\Lang\Driver\FileDriver;
  */
 class LangProvider extends Provider
 {
-    /**
-     * Application context
-     *
-     * @var \Bono\App
-     */
-    protected $app = null;
+    // /**
+    //  * Application context
+    //  *
+    //  * @var \Bono\App
+    //  */
+    // protected $app = null;
 
     /**
-     * Configuration
+     * Default options
      *
      * @var array
      */
-    protected $config = array();
+    protected $options = array(
+        'driver' => '\\Bono\\Lang\\Driver\\FileDriver',
+        'lang'   => 'en',
+        // 'debug'  => true,
+        'debug'  => false,
+    );
 
     /**
      * Initialize the provider
@@ -33,27 +38,17 @@ class LangProvider extends Provider
     {
         $app = $this->app;
 
-        $defaultConfig = array(
-            'driver' => '\\Bono\\Lang\\Driver\\FileDriver',
-            'lang'   => 'en',
-            'debug'  => true
-        );
-        $config = array_merge($defaultConfig, $app->config('lang') ?: array());
-        $Driver = $config['driver'];
-        $driver = new $Driver($config);
+        $Driver = $this->options['driver'];
+        $driver = new $Driver($this->options);
 
-        if (is_callable($config['lang'])) {
-            $callableLang = $config['lang'];
-            $config['lang'] = $callableLang();
+        if (is_callable($this->options['lang'])) {
+            $fn = $this->options['lang'];
+            $this->options['lang'] = $fn();
         }
 
-        $app->config('lang', $config);
+        $Translator = new Translator($this->options, $driver);
 
-        $this->config = $app->config('lang');
-
-        $Translator = new Translator($this->config, $driver);
-
-        $app->container->singleton('translator', function() use ($Translator) {
+        $app->container->singleton('translator', function () use ($Translator) {
             return $Translator;
         });
     }

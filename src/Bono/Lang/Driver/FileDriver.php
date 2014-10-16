@@ -46,8 +46,8 @@ class FileDriver extends AbstractLangDriver
         $path    = $this->config['lang.path'];
         $objects = new RII(new RDI($path), RII::SELF_FIRST);
 
-        foreach($objects as $object) {
-            if($object->getExtension() === 'php') {
+        foreach ($objects as $object) {
+            if ($object->getExtension() === 'php') {
                 $pathName         = $object->getPathName();
                 $explodedPathName = explode('/', dirname($pathName));
                 $fileName         = end($explodedPathName);
