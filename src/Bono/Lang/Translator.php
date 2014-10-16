@@ -161,10 +161,12 @@ class Translator
      */
     protected function arrayGet($key, $default = null)
     {
-        if (isset($this->list[$key])) return $this->list[$key];
+        if (isset($this->list[$key])) {
+            return $this->list[$key];
+        }
 
         foreach (explode('.', $key) as $segment) {
-            if ( ! is_array($this->list) || ! array_key_exists($segment, $this->list)) {
+            if (! is_array($this->list) || ! array_key_exists($segment, $this->list)) {
                 return value($default);
             }
 
