@@ -14,6 +14,10 @@ if (! function_exists('t')) {
      */
     function t($keyWord, $param = array())
     {
-        return App::getInstance()->translator->translate($keyWord, $param);
+        $translator = App::getInstance()->translator;
+        if (is_null($translator)) {
+            throw new \Exception('Undefined translator, please register LangProvider.');
+        }
+        return $translator->translate($keyWord, $param);
     }
 }
