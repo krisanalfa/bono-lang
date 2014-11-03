@@ -17,6 +17,20 @@ class FileDriver extends AbstractLangDriver
     protected $config = array();
 
     /**
+     * List of available words in dictionary
+     *
+     * @var array
+     */
+    protected $list = array();
+
+    /**
+     * List of available language
+     *
+     * @var array
+     */
+    protected $langList = array();
+
+    /**
      * Class constructor
      *
      * @param array $config Configuration
@@ -30,21 +44,41 @@ class FileDriver extends AbstractLangDriver
         } else {
             $this->config['lang.path'] = dirname(dirname(dirname(dirname(__DIR__)))) . DIRECTORY_SEPARATOR . 'lang';
         }
+
+        $this->buildLists();
     }
 
     /**
-     * Get all language in specific folder
-     *
-     * @param  boolean $isLang If we want to get only the language list, return the list of language
-     *                         if not, we return the list of language with it's line of keys
+     * Get list of available translation in our dictionary
      *
      * @return array
      */
-    protected function getLists($isLang = false)
+    public function getLists()
     {
-        $lists   = array();
-        $path    = $this->config['lang.path'];
-        $objects = new RII(new RDI($path), RII::SELF_FIRST);
+        return $this->list;
+    }
+
+    /**
+     * Get list of avaliable language
+     *
+     * @return array
+     */
+    public function getLangLists()
+    {
+        return $this->langList;
+    }
+
+    /**
+     * Build list of translation and available language in specific folder
+     *
+     * @return void
+     */
+    protected function buildLists()
+    {
+        $lists    = array();
+        $langList = array();
+        $path     = $this->config['lang.path'];
+        $objects  = new RII(new RDI($path), RII::SELF_FIRST);
 
         foreach ($objects as $object) {
             if ($object->getExtension() === 'php') {
@@ -52,35 +86,13 @@ class FileDriver extends AbstractLangDriver
                 $explodedPathName = explode('/', dirname($pathName));
                 $fileName         = end($explodedPathName);
 
-                if (! $isLang) {
-                    $lists[$fileName] = require_once $pathName;
-                } else {
-                    $lists[]          = $fileName;
-                }
+                $langList[$fileName] = true;
+                $lists[$fileName] = require_once $pathName;
             }
         }
 
-        return (! $isLang) ? $this->arrayDot($lists) : $lists;
-    }
-
-    /**
-     * Get all language in specific folder
-     *
-     * @return array
-     */
-    public function getList()
-    {
-        return $this->getLists();
-    }
-
-    /**
-     * Get list of language
-     *
-     * @return array List of language
-     */
-    public function getLangList()
-    {
-        return $this->getLists(false);
+        $this->langList = $langList;
+        $this->list = $this->arrayDot($lists);
     }
 
     /**

@@ -5,15 +5,25 @@
  */
 abstract class AbstractLangDriver
 {
-    abstract public function getList();
+    /**
+     * Get list of available translation in our dictionary
+     *
+     * @return array
+     */
+    abstract public function getLists();
 
-    abstract public function getLangList();
+    /**
+     * Get list of avaliable language
+     *
+     * @return array
+     */
+    abstract public function getLangLists();
 
     /**
      * Build an array dot notation
      *
-     * @param  array  $array   Array we want to convert to dot notation array
-     * @param  string $prepend Prepend string to master key
+     * @param array  $array   Array we want to convert to dot notation array
+     * @param string $prepend Prepend string to master key
      *
      * @return array
      */

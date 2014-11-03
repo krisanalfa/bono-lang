@@ -10,13 +10,6 @@ use Bono\Lang\Driver\FileDriver;
  */
 class LangProvider extends Provider
 {
-    // /**
-    //  * Application context
-    //  *
-    //  * @var \Bono\App
-    //  */
-    // protected $app = null;
-
     /**
      * Default options
      *
@@ -25,7 +18,6 @@ class LangProvider extends Provider
     protected $options = array(
         'driver' => '\\Bono\\Lang\\Driver\\FileDriver',
         'lang'   => 'en',
-        // 'debug'  => true,
         'debug'  => false,
     );
 

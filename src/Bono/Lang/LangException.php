@@ -7,5 +7,4 @@ use Exception;
  */
 class LangException extends Exception
 {
-
 }

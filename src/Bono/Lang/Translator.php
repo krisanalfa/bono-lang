@@ -52,25 +52,71 @@ class Translator
     {
         $this->driver   = $driver;
         $this->config   = $config;
-        $this->list     = $driver->getList();
-        $this->langList = $driver->getLangList();
+        $this->list     = $driver->getLists();
+        $this->langList = $driver->getLangLists();
         $this->setLanguage($config['lang']);
     }
 
     /**
      * Translate a language
      *
-     * @param  string $key     The keyword
-     * @param  array  $param   Parameters
+     * @param string $key   The keyword
+     * @param array  $param Parameters
      *
-     * @return string          Translated word(s)
+     * @return string Translated word(s)
      */
-    public function translate($key, $param = array())
+    public function translate($key, $param = array(), $defaultLine = '')
     {
+        $line = $this->replaceParam($this->getLine($key), $param);
 
+        if (! $line) {
+            if ($defaultLine) {
+                return $defaultLine;
+            }
+
+            return ($this->isDebugMode()) ? '{{ '.$key.' }}' : $line;
+        }
+
+        return $line;
+    }
+
+    /**
+     * Retrieve a translation string that is different depending on a count.
+     *
+     * @param string $key   Word to translate
+     * @param array  $count Which one should translate take for current choice?
+     * @param string $param Parameter / placeholder that would be attached to the line
+     *
+     * @return string Translated word
+     */
+    public function choice($key, $count = 1, $param = array())
+    {
+        $line = $this->getLine($key);
+
+        $lines = explode('|', $line);
+
+        if (isset($lines[$count - 1])) {
+            $line = $lines[$count - 1];
+
+            $param['count'] = $count;
+
+            return $this->replaceParam($line, $param);
+        }
+
+        return ($this->isDebugMode()) ? '{{ '.$key.' }}' : $line;
+    }
+
+    /**
+     * Get raw translated line
+     *
+     * @param string $key Word to translate
+     *
+     * @return mixed Translated word
+     */
+    protected function getLine($key)
+    {
         $lang    = $this->lang;
         $key     = $this->sanitize($key);
-        $default = ($this->isDebugMode()) ? '{{ '.$key.' }}' : null;
 
         if (! $this->hasLanguage($lang)) {
             $message = 'Language ['.$lang.'] is not available';
@@ -78,11 +124,7 @@ class Translator
             throw new LangException($message);
         }
 
-        $line = $this->arrayGet($lang.'.'.$key, $default);
-
-        if (! empty($param) and is_array($param)) {
-            $line = $this->replaceParam($line, $param);
-        }
+        $line = $this->arrayGet($lang.'.'.$key);
 
         return $line;
     }
@@ -90,55 +132,13 @@ class Translator
     /**
      * Sanitize key, removing spaces and replace them to underscore
      *
-     * @param  string $key
+     * @param string $key
      *
      * @return string
      */
     protected function sanitize($key)
     {
         return strtolower(str_replace(' ', '_', $key));
-    }
-
-    /**
-     * Get driver
-     *
-     * @return AbstractLangDriver
-     */
-    public function getDriver()
-    {
-        return $this->driver;
-    }
-
-    /**
-     * Set language
-     *
-     * @param string $lang Language we want to use
-     */
-    public function setLanguage($lang)
-    {
-        return $this->lang = $lang;
-    }
-
-    /**
-     * Get active language
-     *
-     * @return string Language
-     */
-    public function getLanguage()
-    {
-        return $this->lang;
-    }
-
-    /**
-     * Determine if we have sort kind of language in our repository
-     *
-     * @param  string  $lang Language to check
-     *
-     * @return boolean
-     */
-    public function hasLanguage($lang)
-    {
-        return isset($this->langList[$lang]);
     }
 
     /**
@@ -152,10 +152,22 @@ class Translator
     }
 
     /**
+     * Determine if we have sort kind of language in our repository
+     *
+     * @param string $lang Language to check
+     *
+     * @return boolean
+     */
+    public function hasLanguage($lang)
+    {
+        return isset($this->langList[$lang]);
+    }
+
+    /**
      * Get line in dot notation
      *
-     * @param  string $array   Keyword in dot.notation
-     * @param  mixed  $default If we cannot find the keyword, return this default
+     * @param string $array   Keyword in dot.notation
+     * @param mixed  $default If we cannot find the keyword, return this default
      *
      * @return mixed
      */
@@ -179,17 +191,49 @@ class Translator
     /**
      * Replace word from parameters
      *
-     * @param  string $line  Word that has parameter mark to replace
-     * @param  array  $param Parameters
+     * @param string $line  Word that has parameter mark to replace
+     * @param array  $param Parameters
      *
      * @return string
      */
     protected function replaceParam($line, array $param)
     {
-        foreach ($param as $key => $value) {
-            $line = str_replace(':'.$key, $value, $line);
+        if (! empty($param) and is_array($param)) {
+            foreach ($param as $key => $value) {
+                $line = str_replace(':'.$key, $value, $line);
+            }
         }
 
         return $line;
+    }
+
+    /**
+     * Get driver
+     *
+     * @return AbstractLangDriver
+     */
+    public function getDriver()
+    {
+        return $this->driver;
+    }
+
+    /**
+     * Set language
+     *
+     * @param string $lang Language we want to use
+     */
+    public function setLanguage($lang)
+    {
+        return $this->lang = $lang;
+    }
+
+    /**
+     * Get current active language
+     *
+     * @return string Language
+     */
+    public function getLanguage()
+    {
+        return $this->lang;
     }
 }
