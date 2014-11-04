@@ -1,33 +1,34 @@
-#Bono Localization Package
+# Bono Localization Package
 Want some translation in your Bono-Based Application? Use this component. Code like a boss.
 
-#Installation
+# Installation
 Add this package to `composer.json` require file:
 
-```js
+```lang-js
 "require": {
     "krisanalfa/bono-lang": "dev-master",
 },
 ```
 
-#Activate Localization Package
+# Activate Localization Package
 Put the Provider to your `bono.providers` configuration:
 
-```php
+```lang-php
 'bono.providers' => array(
-    '\\Norm\\Provider\\NormProvider',
     '\\Bono\\Lang\\Provider\\LangProvider',
 ),
 ```
 
-#Configuration
+# Configuration
 Basic configuration is:
 
-```php
-array(
-    'driver' => '\\Bono\\Lang\\Driver\\FileDriver',
-    'lang' => 'en',
-    'debug' => true
+```lang-php
+'bono.providers' => array(
+    '\\Bono\\Lang\\Provider\\LangProvider' => array(
+        'driver' => '\\Bono\\Lang\\Driver\\FileDriver',
+        'lang'   => 'en',
+        'debug'  => true
+    ),
 ),
 ```
 
@@ -37,7 +38,7 @@ array(
 
 Using closure to determine which language is set to be default one
 
-```php
+```lang-php
 array(
     'driver' => '\\Bono\\Lang\\Driver\\FileDriver',
     'lang' => function() {
@@ -47,18 +48,18 @@ array(
 ),
 ```
 
-#Basic FileDriver Dictionary Knowledge
+# Basic FileDriver Dictionary Knowledge
 You can change the location of your dictionary, by add `lang.path` in configuration files:
 
-```php
-array(
-    'lang' => array(
-        'driver' => '\\Bono\\Lang\\Driver\\FileDriver',
-        'lang' => 'en',
-        'debug' => true,
-        'lang.path' => 'lang',
+```lang-php
+'bono.providers' => array(
+    '\\Bono\\Lang\\Provider\\LangProvider' => array(
+        'driver'    => '\\Bono\\Lang\\Driver\\FileDriver',
+        'lang'      => 'en',
+        'debug'     => true,
+        'lang.path' => 'lang'
     ),
-)
+),
 ```
 
 So in your **root project**, you should create a `lang` folder , and put your dictionary inside that folder.
@@ -77,7 +78,22 @@ So in your **root project**, you should create a `lang` folder , and put your di
 
 When you want Spanish language exists in your repository, make an `es` folder in `lang` folder. The structure of your dictionary should be like this:
 
-```php
+```
+{{ ROOT }}
+├── composer.json
+└── lang
+    ├── en
+    │   └── list.php
+    │   └── anotherList.php
+    ├── id
+    │   └── list.php
+    │   └── extraList.php
+    └── es
+        └── list.php
+        └── spanishList.php
+```
+
+```lang-php
 return array(
     'full_name'  => 'Full Name',
     'birth_date' => 'Birth Date',
@@ -92,7 +108,7 @@ return array(
 #Example dictionary
 Let's say this is our dictionary
 
-```php
+```lang-php
 return array(
     'full_name'  => 'Full Name',
     'birth_date' => 'Birth Date',
@@ -105,25 +121,30 @@ return array(
 ```
 
 #Usage (Based on example dictionary)
+
 You can access translation from application container context, such as:
 
-```php
+```lang-php
 $app        = \Bono\App::getInstance();
 $translator = $app->translator;
 $word       = $translator->translate('message');
 echo $word; // output => 'Hello'
 ```
 
+---
+
 Or via alias function:
 
-```php
+```lang-php
 $word = t('message'); // 't' is an alias for 'translate' method in $translator
 echo $word; // output => 'Hello'
 ```
 
+---
+
 You can append some parameter to your language. But, first, you have to confirm that your line, accept the parameter by change it to
 
-```php
+```lang-php
 // List of English dictionary
 array(
     // ... snip
@@ -134,25 +155,101 @@ array(
 
 So you can append parameter to your dictionary by:
 
-```php
+```lang-php
 $app        = \Bono\App::getInstance();
 $translator = $app->translator;
 $word       = $translator->translate('message', array('name' => 'Alfa'));
 echo $word; // output => 'Hello, Alfa'
 ```
 
+---
+
+The third argument in `translate` method is option to give translator a default translation if there's no translation in dictionary:
+
+
+```lang-php
+$app        = \Bono\App::getInstance();
+$translator = $app->translator;
+$word       = $translator->translate('n00p', array(), 'Default one');
+echo $word; // output => 'Default one.'
+```
+
+---
+
 When you want to access your nested dictionary:
 
-```php
+```lang-php
 $app        = \Bono\App::getInstance();
 $translator = $app->translator;
 $flash      = $translator->translate('flash.fail');
 echo $flash; // output => 'Sorry, app is currently fucked up'
 ```
 
-#Some other method you can access
+---
 
-```php
+This package also support for choice if there's multiple message in a key, something like this:
+
+```lang-php
+// List of English dictionary
+array(
+    // ... snip
+    'options' => 'Sagara|Xinix|Solusitama',
+    // ... snip
+);
+```
+
+If you want to take `Sagara` in `options` key, you can access them by:
+
+```lang-php
+$app        = \Bono\App::getInstance();
+$translator = $app->translator;
+$word       = $translator->choice('options', 1);
+echo $word; // output => 'Sagara'
+```
+
+---
+
+You can also put any placeholder in `choice`, something like this:
+
+```lang-php
+// List of English dictionary
+array(
+    // ... snip
+    'options' => 'Sagara|Xinix :string|Solusitama',
+    // ... snip
+);
+```
+
+```lang-php
+$app        = \Bono\App::getInstance();
+$translator = $app->translator;
+$word       = $translator->choice('options', 2, array('string' => 'Technology'));
+echo $word; // output => 'Xinix Technology'
+```
+
+---
+
+The `count` variable is automatically appended in `choice` method:
+
+```lang-php
+// List of English dictionary
+array(
+    // ... snip
+    'options' => 'Sagara|Xinix :string|Solusitama :count',
+    // ... snip
+);
+```
+
+```lang-php
+$app        = \Bono\App::getInstance();
+$translator = $app->translator;
+$word       = $translator->choice('options', 3);
+echo $word; // output => 'Solusitama 3'
+```
+
+# Some other method you can access
+
+```lang-php
 $app        = \Bono\App::getInstance();
 $translator = $app->translator;
 
