@@ -54,6 +54,7 @@ class Translator
         $this->config   = $config;
         $this->list     = $driver->getLists();
         $this->langList = $driver->getLangLists();
+
         $this->setLanguage($config['lang']);
     }
 
@@ -67,13 +68,9 @@ class Translator
      */
     public function translate($key, $param = array(), $defaultLine = '')
     {
-        $line = $this->replaceParam($this->getLine($key), $param);
+        $line = $this->replaceParam($this->getLine($key, $defaultLine), $param);
 
         if (! $line) {
-            if ($defaultLine) {
-                return $defaultLine;
-            }
-
             return ($this->isDebugMode()) ? '{{ '.$key.' }}' : $line;
         }
 
@@ -113,7 +110,7 @@ class Translator
      *
      * @return mixed Translated word
      */
-    protected function getLine($key)
+    protected function getLine($key, $default = null)
     {
         $lang    = $this->lang;
         $key     = $this->sanitize($key);
@@ -124,7 +121,7 @@ class Translator
             throw new LangException($message);
         }
 
-        $line = $this->arrayGet($lang.'.'.$key);
+        $line = $this->arrayGet($lang.'.'.$key, $default);
 
         return $line;
     }
@@ -179,7 +176,7 @@ class Translator
 
         foreach (explode('.', $key) as $segment) {
             if (! is_array($this->list) || ! array_key_exists($segment, $this->list)) {
-                return value($default);
+                return (is_callable($default)) ? $default() : $default;
             }
 
             $this->list = $this->list[$segment];
@@ -224,7 +221,7 @@ class Translator
      */
     public function setLanguage($lang)
     {
-        return $this->lang = $lang;
+        $this->lang = $lang;
     }
 
     /**

@@ -17,7 +17,7 @@ if (! function_exists('t')) {
         $translator = App::getInstance()->translator;
 
         if (is_null($translator)) {
-            throw new \Exception('Undefined translator, please register LangProvider.');
+            throw new Exception('Undefined translator, please register LangProvider.');
         }
 
         return $translator->translate($keyWord, $param, $default);
@@ -39,7 +39,7 @@ if (! function_exists('c')) {
         $translator = App::getInstance()->translator;
 
         if (is_null($translator)) {
-            throw new \Exception('Undefined translator, please register LangProvider.');
+            throw new Exception('Undefined translator, please register LangProvider.');
         }
 
         return $translator->choice($keyWord, $count, $param);
